@@ -1,0 +1,21 @@
+node {
+def maven_home = tool name: "maven 3.8.5"
+stage("checkout"){
+git 'https://github.com/nikhilkumarcnk/maven-web-application.git'
+}
+stage("build"){
+sh "$maven_home/bin/mvn clean package"
+}
+stage("sonar"){
+sh "$maven_home/bin/mvn sonar:sonar"
+}
+stage("uplaod nexus"){
+sh "$maven_home/bin/mvn deploy"
+}
+stage("tomcat"){
+sshagent(['tomcatid']) {
+    // some block
+	sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.232.194.242:/opt/apache-tomcat-9.0.62/webapps"
+}
+}
+}
